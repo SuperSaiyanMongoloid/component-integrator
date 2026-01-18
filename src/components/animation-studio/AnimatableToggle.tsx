@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 
 interface AnimatableToggleProps {
   checked: boolean;
+  disabled?: boolean;
   colors: {
     active: string;
     default: string;
@@ -19,6 +20,7 @@ interface AnimatableToggleProps {
 
 export function AnimatableToggle({ 
   checked, 
+  disabled = false,
   colors,
   animation,
   className 
@@ -30,6 +32,7 @@ export function AnimatableToggle({
     <div 
       className={cn(
         "relative block h-8 w-[52px] [transform:translateZ(0)] [-webkit-transform:translateZ(0)] [backface-visibility:hidden] [-webkit-backface-visibility:hidden] [perspective:1000] [-webkit-perspective:1000]",
+        disabled && "opacity-50 cursor-not-allowed pointer-events-none",
         className
       )}
       style={{
@@ -37,6 +40,7 @@ export function AnimatableToggle({
         '--c-default': colors.default,
         '--c-default-dark': colors.defaultDark,
       } as React.CSSProperties}
+      aria-disabled={disabled}
     >
       <div 
         className="h-full w-full rounded-full transition-colors [transform:translate3d(0,0,0)] [-webkit-transform:translate3d(0,0,0)]"

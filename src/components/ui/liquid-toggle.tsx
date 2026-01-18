@@ -5,27 +5,20 @@ import { cn } from '@/lib/utils';
 
 const styles = {
   switch: `relative block cursor-pointer h-8 w-[52px]
-    [--c-active:#275EFE]
-    [--c-success:#10B981]
-    [--c-warning:#F59E0B]
-    [--c-danger:#EF4444]
-    [--c-active-inner:#FFFFFF]
-    [--c-default:#D2D6E9]
-    [--c-default-dark:#C7CBDF]
-    [--c-black:#1B1B22]
     [transform:translateZ(0)]
     [-webkit-transform:translateZ(0)]
     [backface-visibility:hidden]
     [-webkit-backface-visibility:hidden]
     [perspective:1000]
     [-webkit-perspective:1000]`,
+  switchDisabled: `opacity-50 cursor-not-allowed pointer-events-none`,
   input: `h-full w-full cursor-pointer appearance-none rounded-full
-    bg-[--c-default] outline-none transition-colors duration-500
-    hover:bg-[--c-default-dark]
+    bg-toggle-default outline-none transition-colors duration-500
+    hover:bg-toggle-default-hover
     [transform:translate3d(0,0,0)]
     [-webkit-transform:translate3d(0,0,0)]
     data-[checked=true]:bg-[--c-background]`,
-  svg: `pointer-events-none absolute inset-0 fill-white
+  svg: `pointer-events-none absolute inset-0 fill-toggle-knob
     [transform:translate3d(0,0,0)]
     [-webkit-transform:translate3d(0,0,0)]`,
   circle: `transform-gpu transition-transform duration-500
@@ -39,10 +32,10 @@ const styles = {
 };
 
 const variantStyles = {
-  default: '[--c-background:var(--c-active)]',
-  success: '[--c-background:var(--c-success)]',
-  warning: '[--c-background:var(--c-warning)]',
-  danger: '[--c-background:var(--c-danger)]',
+  default: '[--c-background:hsl(var(--toggle-active))]',
+  success: '[--c-background:hsl(var(--toggle-success))]',
+  warning: '[--c-background:hsl(var(--toggle-warning))]',
+  danger: '[--c-background:hsl(var(--toggle-danger))]',
 };
 
 interface ToggleProps {
@@ -50,27 +43,38 @@ interface ToggleProps {
   onCheckedChange?: (checked: boolean) => void;
   className?: string;
   variant?: 'default' | 'success' | 'warning' | 'danger';
+  disabled?: boolean;
 }
 
 export function Toggle({ 
   checked = false, 
   onCheckedChange, 
   className,
-  variant = 'default'
+  variant = 'default',
+  disabled = false
 }: ToggleProps) {
   const [isChecked, setIsChecked] = React.useState(checked);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (disabled) return;
     setIsChecked(e.target.checked);
     onCheckedChange?.(e.target.checked);
   };
 
   return (
-    <label className={cn(styles.switch, className)}>
+    <label 
+      className={cn(
+        styles.switch, 
+        disabled && styles.switchDisabled,
+        className
+      )}
+      aria-disabled={disabled}
+    >
       <input
         type="checkbox"
         checked={isChecked}
         onChange={handleChange}
+        disabled={disabled}
         data-checked={isChecked}
         className={cn(styles.input, variantStyles[variant])}
       />
