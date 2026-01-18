@@ -18,6 +18,7 @@ export default {
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
+        "background-alt": "hsl(var(--background-alt))",
         foreground: "hsl(var(--foreground))",
         primary: {
           DEFAULT: "hsl(var(--primary))",
@@ -56,6 +57,15 @@ export default {
           "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
+        },
+        toggle: {
+          default: "hsl(var(--toggle-default))",
+          "default-hover": "hsl(var(--toggle-default-hover))",
+          active: "hsl(var(--toggle-active))",
+          success: "hsl(var(--toggle-success))",
+          warning: "hsl(var(--toggle-warning))",
+          danger: "hsl(var(--toggle-danger))",
+          knob: "hsl(var(--toggle-knob))",
         },
       },
       borderRadius: {
