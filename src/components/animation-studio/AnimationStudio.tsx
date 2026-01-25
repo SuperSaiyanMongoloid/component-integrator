@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { Settings2, Layers } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -8,8 +8,9 @@ import { Timeline } from './components/Timeline';
 import { ComparisonView } from './components/ComparisonView';
 import { BezierEditor } from './components/BezierEditor';
 import { ControlPanel } from './components/ControlPanel';
-import { GooeyToggle, StudioGooeyFilters } from './components/GooeyToggle';
+import { ComponentSelector } from './components/ComponentSelector';
 import { useTimeline } from './hooks/useTimeline';
+import { COMPONENT_REGISTRY, AllGooeyFilters } from './registry';
 import { 
   DEFAULT_ANIMATION, 
   DEFAULT_COLORS,
@@ -19,9 +20,13 @@ import {
 } from './types';
 
 export function AnimationStudio() {
-  // Original (reference) config - never changes during editing
-  const [originalConfig] = useState<AnimationConfig>(DEFAULT_ANIMATION);
-  const [originalColors] = useState<ColorConfig>(DEFAULT_COLORS);
+  // Component selection
+  const [activeComponentId, setActiveComponentId] = useState('gooey-toggle');
+  const activeComponent = COMPONENT_REGISTRY[activeComponentId];
+  
+  // Original (reference) config - reset when component changes
+  const [originalConfig, setOriginalConfig] = useState<AnimationConfig>(DEFAULT_ANIMATION);
+  const [originalColors, setOriginalColors] = useState<ColorConfig>(DEFAULT_COLORS);
   
   // Edited config - user modifies this
   const [config, setConfig] = useState<AnimationConfig>(DEFAULT_ANIMATION);
@@ -34,6 +39,18 @@ export function AnimationStudio() {
   const [showControls, setShowControls] = useState(true);
   
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Reset configs when component changes
+  const handleComponentChange = useCallback((componentId: string) => {
+    const component = COMPONENT_REGISTRY[componentId];
+    if (component) {
+      setActiveComponentId(componentId);
+      setColors(component.defaultColors);
+      setOriginalColors(component.defaultColors);
+      setToggleState(false);
+      setCurrentToggle(0);
+    }
+  }, []);
 
   const effectiveDuration = config.duration / config.speed;
 
@@ -85,18 +102,28 @@ export function AnimationStudio() {
 
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100">
-      <StudioGooeyFilters />
+      <AllGooeyFilters />
       
       {/* Header */}
       <header className="border-b border-neutral-800 bg-neutral-900/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="max-w-[1600px] mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-neutral-800 flex items-center justify-center">
-              <Layers className="w-4 h-4 text-neutral-400" />
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-neutral-800 flex items-center justify-center">
+                <Layers className="w-4 h-4 text-neutral-400" />
+              </div>
+              <div>
+                <h1 className="text-sm font-semibold text-neutral-200">Animation Studio</h1>
+                <p className="text-xs text-neutral-500">{activeComponent?.name || 'Select Component'}</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-sm font-semibold text-neutral-200">Animation Studio</h1>
-              <p className="text-xs text-neutral-500">Gooey Toggle</p>
+            
+            {/* Component Selector */}
+            <div className="hidden md:block border-l border-neutral-800 pl-4 ml-2">
+              <ComponentSelector
+                activeComponentId={activeComponentId}
+                onSelect={handleComponentChange}
+              />
             </div>
           </div>
           
@@ -124,7 +151,7 @@ export function AnimationStudio() {
           <main className="p-6 space-y-6">
             {/* Comparison View */}
             <ComparisonView
-              component={GooeyToggle}
+              component={activeComponent.component}
               checked={toggleState}
               progress={timeline.progress}
               originalAnimation={{
